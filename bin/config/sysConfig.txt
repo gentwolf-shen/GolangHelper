@@ -1,0 +1,19 @@
+{
+	"web":{
+		"port":":8080",
+		"isDebug": true
+	},
+	"db":{
+		"default": {
+			"type": "mysql", 
+			"dsn": "test:test@tcp(127.0.0.1:3306)/test?charset=utf8",
+			"maxOpenConnections": 1,
+			"maxIdleConnections": 1
+		}
+	},
+	"cache": {
+		"expiration": 3600,
+		"prefix": "test_",
+		"host": "127.0.0.1:11211"
+	}
+}

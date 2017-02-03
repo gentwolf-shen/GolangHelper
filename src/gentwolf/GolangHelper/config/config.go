@@ -39,8 +39,17 @@ type CacheConfig struct {
 	Host       string `json:"host"`
 }
 
+type RedisConfig struct {
+	Address     string
+	MaxIdle     int
+	MaxActive   int
+	IdleTimeout int
+	Wait        bool
+}
+
 type Config struct {
-	Web   WebConfig           `json:"web"`
-	Db    map[string]DbConfig `json:"db"`
-	Cache CacheConfig         `json:"cache"`
+	Web   WebConfig              `json:"web"`
+	Db    map[string]DbConfig    `json:"db"`
+	Cache CacheConfig            `json:"cache"`
+	Redis map[string]RedisConfig `json:"redis"`
 }

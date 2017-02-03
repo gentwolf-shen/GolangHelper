@@ -1,34 +1,62 @@
 package redis
 
 import (
+	"gentwolf/GolangHelper/config"
 	RDS "github.com/garyburd/redigo/redis"
+	"time"
 )
 
-var conn RDS.Conn
+var pool *RDS.Pool
 
-func Dial(address string) error {
-	var err error
-	conn, err = RDS.Dial("tcp", address)
-	return err
-}
+func Connect(cfg config.RedisConfig) {
+	pool = &RDS.Pool{}
+	pool.MaxActive = cfg.MaxActive
+	pool.MaxIdle = cfg.MaxIdle
+	pool.Wait = cfg.Wait
+	pool.IdleTimeout = time.Duration(cfg.IdleTimeout)
 
-func Close() {
-	conn.Close()
-}
+	pool.Dial = func() (RDS.Conn, error) {
+		c, err := RDS.Dial("tcp", cfg.Address)
+		if err != nil {
+			return nil, err
+		}
+		return c, nil
+	}
 
-func Get(key string) ([]byte, error) {
-	return RDS.Bytes(conn.Do("GET", key))
-}
-
-func GetStr(key string) (string, error) {
-	return RDS.String(conn.Do("GET", key))
-}
-
-func Set(key string, v interface{}) error {
-	_, err := conn.Do("SET", key, v)
-	return err
 }
 
 func Send(cmdName string, args ...interface{}) error {
-	return conn.Send(cmdName, args...)
+	conn := pool.Get()
+	err := conn.Send(cmdName, args...)
+	conn.Close()
+
+	return err
+}
+
+func Do(cmdName string, args ...interface{}) (interface{}, error) {
+	conn := pool.Get()
+	replay, err := conn.Do(cmdName, args...)
+	conn.Close()
+
+	return replay, err
+}
+
+func Set(key string, v interface{}) error {
+	return Send("SET", key, v)
+}
+
+func Get(key string) ([]byte, error) {
+	return RDS.Bytes(Do("GET", key))
+}
+
+func GetStr(key string) (string, error) {
+	return RDS.String(Do("GET", key))
+}
+
+func MqSet(key string, v interface{}) error {
+	return Send("LPUSH", key, v)
+}
+
+func MqGet(key string) (interface{}, error) {
+	return Do("RPOP", key)
 }

@@ -15,5 +15,14 @@
 		"expiration": 3600,
 		"prefix": "test_",
 		"host": "127.0.0.1:11211"
+	},
+	"redis": {
+		"default": {
+			"address": "127.0.0.1:6379",
+			"maxIdle":  1,
+			"maxActive": 10,
+			"idleTimeout": 86400,
+			"wait": false
+		}
 	}
 }

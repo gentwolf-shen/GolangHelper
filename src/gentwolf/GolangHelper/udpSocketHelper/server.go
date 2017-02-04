@@ -11,10 +11,9 @@ type Server struct {
 
 	conn *net.UDPConn
 
-	IsConnected bool
-	OnConnect   func(client string)
-	OnClose     func(client string)
-	OnMessage   func(client string, b []byte)
+	OnConnect func(client string)
+	OnClose   func(client string)
+	OnMessage func(client string, b []byte)
 }
 
 func (this *Server) Listen(netType, addr string) error {
@@ -29,7 +28,6 @@ func (this *Server) Listen(netType, addr string) error {
 	}
 
 	this.clients = make(map[string]*net.UDPAddr)
-	this.IsConnected = true
 
 	go this.handleClient()
 
@@ -39,10 +37,6 @@ func (this *Server) Listen(netType, addr string) error {
 //接收客户端消息，并保存客户端信息
 func (this *Server) handleClient() {
 	for {
-		if !this.IsConnected {
-			break
-		}
-
 		buf := make([]byte, BufferLength)
 		if n, clientAddr, err := this.conn.ReadFromUDP(buf); err == nil {
 			client := clientAddr.String()
@@ -77,9 +71,6 @@ func (this *Server) Boardcast(b []byte) {
 	}
 }
 
-func (this *Server) Close() {
-	this.IsConnected = false
-	this.conn.Close()
-	this.clientLength = 0
-	this.clients = nil
+func (this *Server) ClientLength() int {
+	return int(this.clientLength)
 }

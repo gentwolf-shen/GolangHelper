@@ -28,9 +28,7 @@ func (this *Client) Dial(netType, addr string) error {
 }
 
 func (this *Client) waitMessage() {
-	defer func() {
-		this.Close()
-	}()
+	defer this.Close()
 
 	readStream(&this.conn, func(b []byte) {
 		this.OnMessage(b)

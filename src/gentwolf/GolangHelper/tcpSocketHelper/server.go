@@ -6,7 +6,6 @@ import (
 )
 
 type Server struct {
-	clientIndex  int32
 	clientLength int32
 	clients      map[string]*net.Conn
 
@@ -41,7 +40,6 @@ func (this *Server) Listen(netType, addr string) error {
 }
 
 func (this *Server) handleClient(conn *net.Conn) {
-	atomic.AddInt32(&this.clientIndex, 1)
 	atomic.AddInt32(&this.clientLength, 1)
 
 	client := (*conn).RemoteAddr().String()
@@ -69,7 +67,7 @@ func (this *Server) Send(client string, b []byte) error {
 func (this *Server) CloseClient(client string) {
 	if conn, bl := this.clients[client]; bl {
 		(*conn).Close()
-		
+
 		delete(this.clients, client)
 		atomic.AddInt32(&this.clientLength, -1)
 		this.OnClose(client)

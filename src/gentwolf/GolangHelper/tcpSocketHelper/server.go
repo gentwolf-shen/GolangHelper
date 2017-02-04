@@ -8,11 +8,11 @@ import (
 type Server struct {
 	clientIndex  int32
 	clientLength int32
-	clients      map[int32]*net.Conn
+	clients      map[string]*net.Conn
 
-	OnConnect func(index int32)
-	OnClose   func(index int32)
-	OnMessage func(index int32, b []byte)
+	OnConnect func(client string)
+	OnClose   func(client string)
+	OnMessage func(client string, b []byte)
 }
 
 func (this *Server) Listen(netType, addr string) error {
@@ -26,13 +26,13 @@ func (this *Server) Listen(netType, addr string) error {
 		return err
 	}
 
-	this.clients = make(map[int32]*net.Conn)
+	this.clients = make(map[string]*net.Conn)
 
 	go func() {
 		for {
 			conn, err := listener.Accept()
 			if err == nil {
-				go this.handleClient(conn)
+				go this.handleClient(&conn)
 			}
 		}
 	}()
@@ -40,25 +40,24 @@ func (this *Server) Listen(netType, addr string) error {
 	return nil
 }
 
-func (this *Server) handleClient(conn net.Conn) {
-	index := atomic.AddInt32(&this.clientIndex, 1)
-	this.clients[index] = &conn
-
+func (this *Server) handleClient(conn *net.Conn) {
+	atomic.AddInt32(&this.clientIndex, 1)
 	atomic.AddInt32(&this.clientLength, 1)
 
-	defer func() {
-		this.CloseClient(index)
-	}()
+	client := (*conn).RemoteAddr().String()
+	this.clients[client] = conn
 
-	this.OnConnect(index)
+	defer this.CloseClient(client)
 
-	readStream(&conn, func(b []byte) {
-		this.OnMessage(index, b)
+	this.OnConnect(client)
+
+	readStream(conn, func(b []byte) {
+		this.OnMessage(client, b)
 	})
 }
 
-func (this *Server) Send(index int32, b []byte) error {
-	if conn, bl := this.clients[index]; bl {
+func (this *Server) Send(client string, b []byte) error {
+	if conn, bl := this.clients[client]; bl {
 		_, err := (*conn).Write(pack(b))
 		if err != nil {
 			return err
@@ -67,18 +66,19 @@ func (this *Server) Send(index int32, b []byte) error {
 	return nil
 }
 
-func (this *Server) CloseClient(index int32) {
-	if conn, bl := this.clients[index]; bl {
+func (this *Server) CloseClient(client string) {
+	if conn, bl := this.clients[client]; bl {
 		(*conn).Close()
-		delete(this.clients, index)
+		
+		delete(this.clients, client)
 		atomic.AddInt32(&this.clientLength, -1)
-		this.OnClose(index)
+		this.OnClose(client)
 	}
 }
 
 func (this *Server) CloseAll() {
-	for index, _ := range this.clients {
-		this.CloseClient(index)
+	for client, _ := range this.clients {
+		this.CloseClient(client)
 	}
 }
 
@@ -86,10 +86,6 @@ func (this *Server) Boardcast(b []byte) {
 	for _, conn := range this.clients {
 		(*conn).Write(pack(b))
 	}
-}
-
-func (this *Server) Clients() map[int32]*net.Conn {
-	return this.clients
 }
 
 func (this *Server) ClientLength() int {

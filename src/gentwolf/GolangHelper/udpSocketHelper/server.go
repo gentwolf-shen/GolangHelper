@@ -53,16 +53,16 @@ func (this *Server) handleClient() {
 
 //发送消息到客户端，如果发送失败，则将客户端信息删除
 func (this *Server) Send(client string, b []byte) error {
+	var err error
 	if addr, bl := this.clients[client]; bl {
-		_, err := this.conn.WriteToUDP(b, addr)
+		_, err = this.conn.WriteToUDP(b, addr)
 		if err != nil {
 			delete(this.clients, client)
 			atomic.AddInt32(&this.clientLength, -1)
 			this.OnClose(client)
 		}
-		return nil
 	}
-	return nil
+	return err
 }
 
 func (this *Server) Boardcast(b []byte) {

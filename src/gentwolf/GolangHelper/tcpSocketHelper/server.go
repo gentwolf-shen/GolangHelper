@@ -55,13 +55,11 @@ func (this *Server) handleClient(conn *net.Conn) {
 }
 
 func (this *Server) Send(client string, b []byte) error {
+	var err error
 	if conn, bl := this.clients[client]; bl {
-		_, err := (*conn).Write(pack(b))
-		if err != nil {
-			return err
-		}
+		_, err = (*conn).Write(pack(b))
 	}
-	return nil
+	return err
 }
 
 func (this *Server) CloseClient(client string) {

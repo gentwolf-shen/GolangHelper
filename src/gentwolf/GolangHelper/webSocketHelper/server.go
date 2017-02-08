@@ -2,7 +2,7 @@ package webSocketHelper
 
 import (
 	"code.google.com/p/go.net/websocket"
-	"gentwolf/GolangHelper/util"
+	"gentwolf/GolangHelper/convert"
 	"net/http"
 	"sync/atomic"
 )
@@ -34,7 +34,7 @@ func (this *Server) handleClient(conn *websocket.Conn) {
 	atomic.AddInt32(&this.index, 1)
 	atomic.AddInt32(&this.clientLength, 1)
 
-	client := util.ToStr(this.index)
+	client := convert.ToStr(this.index)
 	this.clients[client] = conn
 
 	defer this.CloseClient(client)

@@ -26,7 +26,11 @@ func (this *Client) GetLink() *rpc.Client {
 	return this.client
 }
 
+func (this *Client) Call(method string, args interface{}, reply interface{}) error {
+	return this.client.Call(method, args, reply)
+}
+
 func (this *Client) Close() {
-	this.conn.Close()
 	this.client.Close()
+	this.conn.Close()
 }

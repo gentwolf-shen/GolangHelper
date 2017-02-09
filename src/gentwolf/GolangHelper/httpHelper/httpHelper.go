@@ -95,20 +95,21 @@ func httpRequest(method string, hostUrl string, params url.Values, headers map[s
 
 	defer response.Body.Close()
 
-	if response.StatusCode != 404 {
-		var body []byte
-		switch response.Header.Get("Content-Encoding") {
-		case "gzip":
-			reader, _ := gzip.NewReader(response.Body)
-			body, _ = ioutil.ReadAll(reader)
-		default:
-			body, _ = ioutil.ReadAll(response.Body)
-		}
-
-		return body, nil
+	var responseBody []byte
+	switch response.Header.Get("Content-Encoding") {
+	case "gzip":
+		reader, _ := gzip.NewReader(response.Body)
+		responseBody, _ = ioutil.ReadAll(reader)
+		reader.Close()
+	default:
+		responseBody, _ = ioutil.ReadAll(response.Body)
 	}
 
-	return nil, errors.New(strconv.Itoa(response.StatusCode))
+	if response.StatusCode == 200 {
+		return responseBody, nil
+	}
+
+	return responseBody, errors.New(strconv.Itoa(response.StatusCode))
 }
 
 func PostWithFile(url string, param url.Values, files map[string]string) ([]byte, error) {

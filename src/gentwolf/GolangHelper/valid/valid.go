@@ -1,7 +1,7 @@
 package valid
 
 import (
-	"gentwolf/GolangHelper/util"
+	"gentwolf/GolangHelper/convert"
 	"regexp"
 )
 
@@ -14,10 +14,10 @@ func IsUsername(str string, args ...int) bool {
 	maxLen := "20"
 	switch len(args) {
 	case 1:
-		minLen = util.ToStr(args[0])
+		minLen = convert.ToStr(args[0])
 	case 2:
-		minLen = util.ToStr(args[0])
-		maxLen = util.ToStr(args[1])
+		minLen = convert.ToStr(args[0])
+		maxLen = convert.ToStr(args[1])
 	}
 	key := "IsUsername_" + minLen + "-" + maxLen
 
@@ -36,8 +36,8 @@ func IsString(str string, minLen, maxLength int) bool {
 }
 
 func IsDigit(str string, minLength int, maxLength int) bool {
-	min := util.ToStr(minLength)
-	max := util.ToStr(maxLength)
+	min := convert.ToStr(minLength)
+	max := convert.ToStr(maxLength)
 
 	key := "isDigit_" + min + "_" + max
 	reg, bl := items[key]
@@ -50,8 +50,8 @@ func IsDigit(str string, minLength int, maxLength int) bool {
 }
 
 func IsAlpha(str string, minLength int, maxLength int) bool {
-	min := util.ToStr(minLength)
-	max := util.ToStr(maxLength)
+	min := convert.ToStr(minLength)
+	max := convert.ToStr(maxLength)
 
 	key := "isAlpha_" + min + "_" + max
 	reg, bl := items[key]

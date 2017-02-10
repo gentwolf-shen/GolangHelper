@@ -9,6 +9,15 @@ var (
 	items = make(map[string]*regexp.Regexp)
 )
 
+func testStr(key, ptn, str string) bool {
+	reg, bl := items[key]
+	if !bl {
+		reg = regexp.MustCompile(ptn)
+		items[key] = reg
+	}
+	return reg.MatchString(str)
+}
+
 func IsUsername(str string, args ...int) bool {
 	minLen := "6"
 	maxLen := "20"
@@ -19,15 +28,10 @@ func IsUsername(str string, args ...int) bool {
 		minLen = convert.ToStr(args[0])
 		maxLen = convert.ToStr(args[1])
 	}
+
 	key := "IsUsername_" + minLen + "-" + maxLen
-
-	reg, bl := items[key]
-	if !bl {
-		reg = regexp.MustCompile("^[A-Za-z0-9-]{" + minLen + "," + maxLen + "}$")
-		items[key] = reg
-	}
-
-	return reg.MatchString(str)
+	ptn := "^[A-Za-z0-9-]{" + minLen + "," + maxLen + "}$"
+	return testStr(key, ptn, str)
 }
 
 func IsString(str string, minLen, maxLength int) bool {
@@ -40,13 +44,8 @@ func IsDigit(str string, minLength int, maxLength int) bool {
 	max := convert.ToStr(maxLength)
 
 	key := "isDigit_" + min + "_" + max
-	reg, bl := items[key]
-	if !bl {
-		reg = regexp.MustCompile("^[0-9]{" + min + "," + max + "}$")
-		items[key] = reg
-	}
-
-	return reg.MatchString(str)
+	ptn := "^[0-9]{" + min + "," + max + "}$"
+	return testStr(key, ptn, str)
 }
 
 func IsAlpha(str string, minLength int, maxLength int) bool {
@@ -54,13 +53,8 @@ func IsAlpha(str string, minLength int, maxLength int) bool {
 	max := convert.ToStr(maxLength)
 
 	key := "isAlpha_" + min + "_" + max
-	reg, bl := items[key]
-	if !bl {
-		reg = regexp.MustCompile("^[a-zA-Z]{" + min + "," + max + "}$")
-		items[key] = reg
-	}
-
-	return reg.MatchString(str)
+	ptn := "^[a-zA-Z]{" + min + "," + max + "}$"
+	return testStr(key, ptn, str)
 }
 
 func IsYearMonth(str string, args ...string) bool {
@@ -70,12 +64,8 @@ func IsYearMonth(str string, args ...string) bool {
 	}
 
 	key := "IsYearMonth" + split
-	reg, bl := items[key]
-	if !bl {
-		reg = regexp.MustCompile("^2[0-9]{3}" + split + "([0][1-9]|[1][0-2])$")
-		items[key] = reg
-	}
-	return reg.MatchString(str)
+	ptn := "^2[0-9]{3}" + split + "([0][1-9]|[1][0-2])$"
+	return testStr(key, ptn, str)
 }
 
 func IsDate(str string, args ...string) bool {
@@ -85,20 +75,18 @@ func IsDate(str string, args ...string) bool {
 	}
 
 	key := "IsDate" + split
-	reg, bl := items[key]
-	if !bl {
-		reg = regexp.MustCompile("^2[0-9]{3}" + split + "([0][1-9]|[1][0-2])" + split + "([0][1-9]|[1-2][0-9]|[3][0-1])$")
-		items[key] = reg
-	}
-	return reg.MatchString(str)
+	ptn := "^2[0-9]{3}" + split + "([0][1-9]|[1][0-2])" + split + "([0][1-9]|[1-2][0-9]|[3][0-1])$"
+	return testStr(key, ptn, str)
 }
 
 func IsMobile(str string) bool {
 	key := "IsMobile"
-	reg, bl := items[key]
-	if !bl {
-		reg = regexp.MustCompile("^1[345789][0-9]{9}$")
-		items[key] = reg
-	}
-	return reg.MatchString(str)
+	ptn := "^1[345789][0-9]{9}$"
+	return testStr(key, ptn, str)
+}
+
+func IsEmail(str string) bool {
+	key := "IsEmail"
+	ptn := `^[a-z0-9][.a-z0-9_-]*@[a-z0-9][a-z0-9-]*(\.[a-z0-9]{2,10})+$`
+	return testStr(key, ptn, str)
 }

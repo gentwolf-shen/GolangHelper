@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 )
 
-func LoadConfig(filename string) (Config, error) {
+func Load(filename string) (Config, error) {
 	cfg := Config{}
 
 	b, err := ioutil.ReadFile(filename)

@@ -7,7 +7,7 @@ import (
 
 var items map[string]string
 
-func Init(filename string) error {
+func Load(filename string) error {
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return err

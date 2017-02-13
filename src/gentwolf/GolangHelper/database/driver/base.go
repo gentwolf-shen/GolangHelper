@@ -46,8 +46,9 @@ func (this *Base) Insert(sql string, args ...interface{}) (int64, error) {
 		row := this.dbConn.QueryRow(sql, args...)
 		err = row.Scan(&id)
 	} else {
-		result, err := this.dbConn.Exec(sql, args...)
-		if err == nil {
+		result, err1 := this.dbConn.Exec(sql, args...)
+		err = err1
+		if err1 == nil {
 			id, _ = result.LastInsertId()
 		}
 	}

@@ -46,8 +46,8 @@ func SubString(str string, start, length int) string {
 	return string(s)
 }
 
-func Ceil(size, count int) int {
-	return int(math.Ceil(float64(count) / float64(size)))
+func Ceil(size, count int32) int32 {
+	return int32(math.Ceil(float64(count) / float64(size)))
 }
 
 func Uuid() string {

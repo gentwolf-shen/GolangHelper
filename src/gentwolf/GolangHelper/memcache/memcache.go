@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"encoding/json"
+	"gentwolf/GolangHelper/config"
 	MC "github.com/bradfitz/gomemcache/memcache"
 	"time"
 )
@@ -13,6 +14,10 @@ var (
 	defaultExpiration = int32(60)
 	keyPrefix         = "mem_"
 )
+
+func Init(cfg config.CacheConfig) error {
+	return Connect(cfg.Expiration, cfg.Prefix, cfg.Host)
+}
 
 func Connect(expiration int32, prefix string, host ...string) error {
 	selector := new(MC.ServerList)
@@ -57,7 +62,7 @@ func GetBytes(name string) ([]byte, error) {
 }
 
 func Set(name string, value interface{}, args ...int32) error {
-	bytes, err := Encode(value)
+	bytes, err := encode(value)
 	if err != nil {
 		return err
 	}
@@ -72,14 +77,14 @@ func Get(name string, value interface{}) error {
 		return err
 	}
 
-	return Decode(item.Value, value)
+	return decode(item.Value, value)
 }
 
 func Delete(name string) error {
 	return client.Delete(keyPrefix + name)
 }
 
-func Encode(value interface{}) ([]byte, error) {
+func encode(value interface{}) ([]byte, error) {
 	buf := new(bytes.Buffer)
 	enc := gob.NewEncoder(buf)
 	err := enc.Encode(value)
@@ -90,7 +95,7 @@ func Encode(value interface{}) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func Decode(b []byte, v interface{}) error {
+func decode(b []byte, v interface{}) error {
 	dec := gob.NewDecoder(bytes.NewBuffer(b))
 	return dec.Decode(v)
 }
@@ -120,4 +125,12 @@ func getExpire(args ...int32) int32 {
 	}
 
 	return expire
+}
+
+func Increment(key string, delta uint64) (uint64, error) {
+	return client.Increment(keyPrefix+key, delta)
+}
+
+func Decrement(key string, delta uint64) (uint64, error) {
+	return client.Decrement(keyPrefix+key, delta)
 }

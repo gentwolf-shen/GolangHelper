@@ -10,6 +10,16 @@ func ToInt(str string) int {
 	return i
 }
 
+func ToInt8(str string) int8 {
+	i, _ := strconv.Atoi(str)
+	return int8(i)
+}
+
+func ToInt32(str string) int32 {
+	i, _ := strconv.Atoi(str)
+	return int32(i)
+}
+
 func ToInt64(str string) int64 {
 	i, _ := strconv.ParseInt(str, 10, 64)
 	return i

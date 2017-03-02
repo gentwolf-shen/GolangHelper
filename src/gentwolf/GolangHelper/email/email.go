@@ -3,6 +3,7 @@ package email
 import (
 	"bytes"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"mime"
@@ -173,6 +174,17 @@ func Send(config Config, m *Message) error {
 	m.From = config.From
 	m.To = config.To
 	return smtp.SendMail(config.Smtp+":"+config.Port, auth, m.From, m.Tolist(), m.Bytes())
+}
+
+func LoadConfig(filename string) (*Config, error) {
+	cfg := &Config{}
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return cfg, err
+	}
+
+	err = json.Unmarshal(b, cfg)
+	return cfg, err
 }
 
 type Config struct {

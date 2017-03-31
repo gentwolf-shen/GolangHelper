@@ -169,10 +169,17 @@ func (m *Message) Bytes() []byte {
 	return buf.Bytes()
 }
 
-func Send(config Config, m *Message) error {
+func Send(config *Config, m *Message) error {
 	auth := smtp.PlainAuth("", config.From, config.Password, config.Smtp)
 	m.From = config.From
 	m.To = config.To
+	return smtp.SendMail(config.Smtp+":"+config.Port, auth, m.From, m.Tolist(), m.Bytes())
+}
+
+func SendTo(config *Config, toEmails []string, m *Message) error {
+	auth := smtp.PlainAuth("", config.From, config.Password, config.Smtp)
+	m.From = config.From
+	m.To = toEmails
 	return smtp.SendMail(config.Smtp+":"+config.Port, auth, m.From, m.Tolist(), m.Bytes())
 }
 

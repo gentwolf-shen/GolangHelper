@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-func UrlValuesToMap(urlValues url.Values) map[string]string {
+func UrlValueToMap(urlValues url.Values) map[string]string {
 	params := make(map[string]string, len(urlValues))
 	for k, v := range urlValues {
 		params[k] = v[0]
@@ -22,7 +22,7 @@ func UrlValuesToMap(urlValues url.Values) map[string]string {
 	return params
 }
 
-func MapToUrlValues(data map[string]string) url.Values {
+func MapToUrlValue(data map[string]string) url.Values {
 	params := url.Values{}
 
 	for k, v := range data {
@@ -69,6 +69,9 @@ func httpRequest(method string, hostUrl string, params url.Values, headers map[s
 	} else {
 		if isPostToBody {
 			request, err = http.NewRequest(method, hostUrl, bytes.NewReader(body))
+			if headers == nil {
+				request.Header.Add("Content-Type", "application/JSON; charset=UTF-8")
+			}
 		} else {
 			request, err = http.NewRequest(method, hostUrl, strings.NewReader(params.Encode()))
 			if err == nil {

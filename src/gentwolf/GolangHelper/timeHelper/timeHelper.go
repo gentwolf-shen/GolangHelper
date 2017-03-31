@@ -1,6 +1,7 @@
 package timeHelper
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -22,6 +23,13 @@ func init() {
 //取当前时间的unix timestamp
 func Timestamp() int64 {
 	return time.Now().Unix()
+}
+
+//取标准时间
+func UtcDate() string {
+	t := time.Now().UTC()
+	format := "%d-%0.2d-%0.2dT%0.2d:%0.2d:%0.2d.012Z"
+	return fmt.Sprintf(format, t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
 }
 
 //格式化unix timestamp

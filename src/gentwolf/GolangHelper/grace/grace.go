@@ -224,26 +224,15 @@ func (gs *GraceServer) CloseParentServer() error {
 	return syscall.Kill(parentPID, syscall.SIGQUIT)
 }
 
-func SrvCtrlhandler(w http.ResponseWriter, req *http.Request) {
+func SrvControl(action string) error {
 	var err error
-	err = req.ParseForm()
-	if err != nil {
-		fmt.Fprint(w, err.Error())
-		return
-	}
-
-	action := req.Form.Get("action")
 	switch action {
 	case "restart":
 		err = syscall.Kill(os.Getpid(), syscall.SIGHUP)
 	case "stop":
 		err = syscall.Kill(os.Getpid(), syscall.SIGQUIT)
 	}
-	if err != nil {
-		fmt.Fprint(w, err.Error())
-	} else {
-		fmt.Fprint(w, action+" success")
-	}
+	return err
 }
 
 func (gs *GraceServer) closeListener() (err error) {

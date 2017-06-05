@@ -2,12 +2,12 @@ package database
 
 import (
 	"gentwolf/GolangHelper/config"
-	"gentwolf/GolangHelper/database/driver"
 )
 
 type factory struct {
-	drivers map[string]*driver.Base
+	drivers map[string]*Base
 }
+
 
 var Factory *factory
 
@@ -15,11 +15,12 @@ func init() {
 	Factory = &factory{}
 }
 
+
 func (this *factory) Init(configs map[string]config.DbConfig) error {
-	this.drivers = make(map[string]*driver.Base, len(configs))
+	this.drivers = make(map[string]*Base, len(configs))
 
 	for k, cfg := range configs {
-		tmp := driver.Base{}
+		tmp := Base{}
 		err := tmp.OpenDb(cfg.Type, cfg.Dsn, cfg.MaxOpenConnections, cfg.MaxIdleConnections)
 		if err != nil {
 			return err
@@ -30,7 +31,7 @@ func (this *factory) Init(configs map[string]config.DbConfig) error {
 	return nil
 }
 
-func (this *factory) Driver(key string) *driver.Base {
+func (this *factory) Driver(key string) *Base {
 	return this.drivers[key]
 }
 

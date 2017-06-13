@@ -78,8 +78,6 @@ func (this *Base) Query(sql string, args ...interface{}) ([]map[string]string, e
 		return nil, err
 	}
 
-	defer rows.Close()
-
 	return this.fetchRows(rows, err)
 }
 
@@ -102,6 +100,7 @@ func (this *Base) QueryScalar(sql string, key string, args ...interface{}) (stri
 			return value, err
 		}
 	}
+
 	return "", err
 }
 
@@ -140,6 +139,8 @@ func (this *Base) fetchRows(rows *sql.Rows, err error) ([]map[string]string, err
 			index++
 		}
 	}
+
+	rows.Close()
 
 	return lists[0:index], nil
 }
@@ -183,8 +184,6 @@ func (this *Base) PrepareQuery(name, sql string, args ...interface{}) ([]map[str
 	}
 
 	rows, err1 := stmt.Query(args...)
-	defer rows.Close()
-
 	return this.fetchRows(rows, err1)
 }
 
@@ -209,11 +208,11 @@ func (this *Base) PrepareQueryScalar(name, sql string, args ...interface{}) (str
 	if err1 != nil {
 		return "", err1
 	}
-
-	defer rows.Close()
 	if rows.Next() {
 		rows.Scan(&value)
 	}
+
+	rows.Close()
 
 	return value, err
 }
@@ -231,7 +230,7 @@ func (this *Base) PrepareExec(name, sql string, args ...interface{}) (int64, err
 
 	n := int64(0)
 	if "INSERT" == strings.ToUpper(string(sql[0:6])) {
-		//n, err = result.LastInsertId()
+		n, err = result.LastInsertId()
 	} else {
 		n, err = result.RowsAffected()
 	}

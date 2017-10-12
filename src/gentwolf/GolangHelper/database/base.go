@@ -6,6 +6,7 @@ import (
 )
 
 type Base struct {
+	DbType   string
 	dbConn   *sql.DB
 	stmtList map[string]*sql.Stmt
 }
@@ -15,6 +16,8 @@ func (this *Base) Version() string {
 }
 
 func (this *Base) OpenDb(dbType string, dsn string, maxOpenConnections int, maxIdleConnections int) error {
+	this.DbType = dbType
+
 	var err error
 	this.dbConn, err = sql.Open(dbType, dsn)
 	if err == nil {
@@ -218,21 +221,33 @@ func (this *Base) PrepareQueryScalar(name, sql string, args ...interface{}) (str
 }
 
 func (this *Base) PrepareExec(name, sql string, args ...interface{}) (int64, error) {
+	var n int64
 	stmt, err := this.PrepareSql(name, sql)
 	if err != nil {
 		return 0, err
 	}
 
-	result, err1 := stmt.Exec(args...)
-	if err1 != nil {
-		return 0, err1
-	}
-
-	n := int64(0)
-	if "INSERT" == strings.ToUpper(string(sql[0:6])) {
-		n, err = result.LastInsertId()
+	if strings.Contains(sql, " RETURNING ") {
+		row, err1 := stmt.Query(args...)
+		if err1 != nil {
+			return n, err1
+		}
+		row.Next()
+		err = row.Scan(&n)
+		row.Close()
 	} else {
-		n, err = result.RowsAffected()
+		result, err1 := this.dbConn.Exec(sql, args...)
+		if err1 != nil {
+			return n, err1
+		}
+
+		if "INSERT" == strings.ToUpper(sql[0:6]) {
+			if this.DbType != "postgres" {
+				n, err = result.LastInsertId()
+			}
+		} else {
+			n, err = result.RowsAffected()
+		}
 	}
 
 	return n, err

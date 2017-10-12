@@ -60,3 +60,9 @@ func Uuid() string {
 
 	return hex.EncodeToString(u)
 }
+
+func Rnd(min, max int) int {
+	max += 1
+	r := rnd.New(rnd.NewSource(time.Now().UnixNano()))
+	return min + r.Intn(max-min)
+}

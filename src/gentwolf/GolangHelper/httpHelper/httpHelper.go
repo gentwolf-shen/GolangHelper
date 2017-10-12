@@ -58,7 +58,6 @@ func PostToBody(hostUrl string, body []byte, headers map[string]string) ([]byte,
 func httpRequest(method string, hostUrl string, params url.Values, headers map[string]string, isPostToBody bool, body []byte) ([]byte, error) {
 	var request *http.Request
 	var err error
-
 	if method == "GET" || method == "DELETE" {
 		if !strings.Contains(hostUrl, "?") {
 			hostUrl += "?"
@@ -69,8 +68,8 @@ func httpRequest(method string, hostUrl string, params url.Values, headers map[s
 	} else {
 		if isPostToBody {
 			request, err = http.NewRequest(method, hostUrl, bytes.NewReader(body))
-			if headers == nil {
-				request.Header.Add("Content-Type", "application/JSON; charset=UTF-8")
+			if headers == nil || len(headers) == 0 {
+				request.Header.Add("Content-Type", "application/json;charset=utf-8")
 			}
 		} else {
 			request, err = http.NewRequest(method, hostUrl, strings.NewReader(params.Encode()))

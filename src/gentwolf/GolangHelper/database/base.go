@@ -6,9 +6,10 @@ import (
 )
 
 type Base struct {
-	DbType   string
-	dbConn   *sql.DB
+	dbType   string
 	stmtList map[string]*sql.Stmt
+
+	dbConn *sql.DB
 }
 
 func (this *Base) Version() string {
@@ -16,7 +17,7 @@ func (this *Base) Version() string {
 }
 
 func (this *Base) OpenDb(dbType string, dsn string, maxOpenConnections int, maxIdleConnections int) error {
-	this.DbType = dbType
+	this.dbType = dbType
 
 	var err error
 	this.dbConn, err = sql.Open(dbType, dsn)
@@ -236,13 +237,13 @@ func (this *Base) PrepareExec(name, sql string, args ...interface{}) (int64, err
 		err = row.Scan(&n)
 		row.Close()
 	} else {
-		result, err1 := this.dbConn.Exec(sql, args...)
+		result, err1 := stmt.Exec(args...)
 		if err1 != nil {
 			return n, err1
 		}
 
 		if "INSERT" == strings.ToUpper(sql[0:6]) {
-			if this.DbType != "postgres" {
+			if this.dbType != "postgres" {
 				n, err = result.LastInsertId()
 			}
 		} else {

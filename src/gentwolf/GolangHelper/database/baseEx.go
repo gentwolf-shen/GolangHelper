@@ -7,13 +7,27 @@ import (
 	"gentwolf/GolangHelper/logger"
 )
 
+// 简单查询
+func (this *Base) SimpleQuery(name, table, fields string, keyId int64) map[string]string {
+	s := "SELECT " + fields + " FROM " + table + " WHERE id=?"
+	row, err := this.PrepareQueryRow(name, s, keyId)
+	if err != nil {
+		logger.Out.Error.Println(s)
+		logger.Out.Error.Println("\t", err)
+		return nil
+	}
+
+	return row
+}
+
+// 检测表中值是否存在
 func (this *Base) TableItemExists(table, key string, value interface{}, keyId int64) bool {
-	name := table + "TableItemExists"
+	strKey := convert.ToStr(keyId)
+	name := table + "TableItemExists" + key + "-" + strKey
 
 	s := "SELECT id FROM " + table + " WHERE "
 	if keyId > 0 {
-		s += " id!=" + convert.ToStr(keyId) + " AND "
-
+		s += " id!=" + strKey + " AND "
 		name += "Key"
 	}
 	s += key + "=? LIMIT 1"
@@ -30,7 +44,7 @@ func (this *Base) TableItemExists(table, key string, value interface{}, keyId in
 
 // 修改表中某值
 func (this *Base) TableItemUpdate(table, key, value string, keyId int64) bool {
-	name := table + "TableItemUpdate"
+	name := table + "TableItemUpdate" + key
 
 	sql := "UPDATE " + table + " SET " + key + "=? WHERE user_id=? AND id=?"
 	_, err := this.PrepareExec(name, sql, value, keyId)

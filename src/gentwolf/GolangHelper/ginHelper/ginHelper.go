@@ -39,6 +39,10 @@ func ShowError(c *gin.Context, errorCode int) {
 	ShowMsg(c, errorCode/10000, msg)
 }
 
+func ShowParamError(c *gin.Context) {
+	ShowError(c, 4000001)
+}
+
 func ShowErrorMsg(c *gin.Context, errorCode int, errMsg interface{}) {
 	msg := ErrorMessage{}
 	msg.Code = errorCode

@@ -9,8 +9,17 @@ import (
 
 // 简单查询
 func (this *Base) SimpleQuery(name, table, fields string, keyId int64) map[string]string {
+	var row map[string]string
+	var err error
+
 	s := "SELECT " + fields + " FROM " + table + " WHERE id=?"
-	row, err := this.PrepareQueryRow(name, s, keyId)
+
+	if name == "" {
+		row, err = this.QueryRow(s, keyId)
+	} else {
+		row, err = this.PrepareQueryRow(name, s, keyId)
+	}
+
 	if err != nil {
 		logger.Out.Error.Println(s)
 		logger.Out.Error.Println("\t", err)
@@ -18,6 +27,24 @@ func (this *Base) SimpleQuery(name, table, fields string, keyId int64) map[strin
 	}
 
 	return row
+}
+
+// 更新/删除
+func (this *Base) SimpleUpdate(name, sql string, args ...interface{}) int64 {
+	var n int64 = -1
+	var err error
+
+	if name == "" {
+		n, err = this.Update(sql, args...)
+	} else {
+		n, err = this.PrepareExec(name, sql, args...)
+	}
+
+	if err != nil {
+		logger.Out.Error.Println(err)
+		return -1
+	}
+	return n
 }
 
 // 检测表中值是否存在
@@ -58,10 +85,10 @@ func (this *Base) TableItemUpdate(table, key, value string, keyId int64) bool {
 }
 
 // 删除表中记录
-func (this *Base) TableItemDelete(table string, keyId interface{}) bool {
+func (this *Base) TableItemDelete(table, key string, keyId interface{}) bool {
 	name := table + "TableItemDelete"
 
-	sql := "DELETE FROM " + table + " WHERE id=?"
+	sql := "DELETE FROM " + table + " WHERE " + key + "=?"
 	_, err := this.PrepareExec(name, sql, keyId)
 	if err != nil {
 		logger.Out.Error.Println(sql)

@@ -21,6 +21,16 @@ func Load(filename string) (Config, error) {
 	return cfg, nil
 }
 
+func LoadFromStr(str string) (Config, error) {
+	cfg := Config{}
+
+	if err := json.Unmarshal([]byte(str), &cfg); err != nil {
+		return cfg, err
+	}
+
+	return cfg, nil
+}
+
 type WebConfig struct {
 	Port    string `json:"port"`
 	IsDebug bool   `json:"isDebug"`

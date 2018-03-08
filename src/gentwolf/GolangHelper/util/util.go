@@ -9,6 +9,19 @@ import (
 	"time"
 )
 
+var (
+	chars map[string]string
+)
+
+func init() {
+	chars = make(map[string]string, 5)
+	chars["&"] = "&amp;"
+	chars["\""] = "&quot;"
+	chars["'"] = "&#039;"
+	chars[">"] = "&gt;"
+	chars["<"] = "&lt;"
+}
+
 func RndStr(length int) string {
 	r := rnd.New(rnd.NewSource(time.Now().UnixNano()))
 	rs := make([]string, length)
@@ -65,4 +78,11 @@ func Rnd(min, max int) int {
 	max += 1
 	r := rnd.New(rnd.NewSource(time.Now().UnixNano()))
 	return min + r.Intn(max-min)
+}
+
+func FilterHtmlChars(str string) string {
+	for k, v := range chars {
+		str = strings.Replace(str, k, v, -1)
+	}
+	return str
 }

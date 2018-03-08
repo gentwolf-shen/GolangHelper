@@ -9,7 +9,12 @@ import (
 	"time"
 )
 
-var Out *out
+var (
+	Out              *out
+	logErrorPath     string
+	logErrorFile     *os.File
+	logErrorFilename string
+)
 
 type out struct {
 	Info  *log.Logger
@@ -28,22 +33,45 @@ const (
 	colorWhite
 )
 
-func init() {
+func Init(logPath string) {
 	Out = &out{}
 
-	flag := log.Ldate | log.Ltime | log.Llongfile
+	flag := log.Ldate | log.Ltime | log.Lshortfile
 
 	Out.Info = log.New(os.Stdout, Info(""), flag)
 	Out.Warn = log.New(os.Stdout, Warn(""), flag)
 
-	dir := filepath.Dir(os.Args[0]) + "/log/"
-	if _, err := os.Stat(dir); err != nil {
-		os.Mkdir(dir, os.ModePerm)
+	if logPath == "" {
+		logPath = filepath.Dir(os.Args[0]) + "/log/"
 	}
 
-	filename := dir + "error-" + time.Now().Format("20060102") + ".txt"
-	file, _ := os.OpenFile(filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, os.ModePerm)
-	Out.Error = log.New(io.MultiWriter(file, os.Stderr), Error(""), flag)
+	logErrorPath = logPath
+
+	if _, err := os.Stat(logErrorPath); err != nil {
+		os.Mkdir(logErrorPath, os.ModePerm)
+	}
+
+	logErrorFilename = time.Now().Format("20060102")
+	filename := logErrorPath + "error-" + logErrorFilename + ".txt"
+	logErrorFile, _ = os.OpenFile(filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, os.ModePerm)
+	Out.Error = log.New(io.MultiWriter(logErrorFile, os.Stderr), Error(""), flag)
+
+	checkDay()
+}
+
+func checkDay() {
+	go func() {
+		for range time.Tick(1 * time.Minute) {
+			if filename := time.Now().Format("20060102"); filename != logErrorFilename {
+				logErrorFile.Close()
+				logErrorFilename = filename
+
+				filename := logErrorPath + "error-" + logErrorFilename + ".txt"
+				logErrorFile, _ = os.OpenFile(filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, os.ModePerm)
+				Out.Error.SetOutput(io.MultiWriter(logErrorFile, os.Stderr))
+			}
+		}
+	}()
 }
 
 func Trace(msg string) string {

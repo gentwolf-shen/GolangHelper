@@ -14,7 +14,32 @@ func AllowCrossDomain() gin.HandlerFunc {
 		c.Header("Access-Control-Allow-Credentials", "true")
 		if c.Request.Method == "OPTIONS" {
 			c.Header("Access-Control-Allow-Methods", "POST,GET,PUT,DELETE,OPTIONS")
+			c.Header("Access-Control-Max-Age", "3600")
 			c.AbortWithStatus(200)
+		}
+	}
+}
+
+func AllowCrossDomainV2(domains []string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		host := c.Request.Header.Get("Origin")
+		bl := false
+		for _, domain := range domains {
+			if domain == host {
+				bl = true
+				break
+			}
+		}
+
+		if bl {
+			c.Header("Access-Control-Allow-Origin", host)
+			c.Header("Access-Control-Allow-Headers", "Access-Control-Allow-Origin, X-Requested-With, Content-Type, Authorization")
+			c.Header("Access-Control-Allow-Credentials", "true")
+			if c.Request.Method == "OPTIONS" {
+				c.Header("Access-Control-Allow-Methods", "POST,GET,PUT,DELETE,OPTIONS")
+				c.Header("Access-Control-Max-Age", "3600")
+				c.AbortWithStatus(200)
+			}
 		}
 	}
 }
@@ -31,16 +56,20 @@ func ShowNoAuth(c *gin.Context) {
 	ShowError(c, 4010000)
 }
 
-func ShowError(c *gin.Context, errorCode int) {
-	msg := ErrorMessage{}
-	msg.Code = errorCode
-	msg.Message = dict.Get(convert.ToStr(errorCode))
-
-	ShowMsg(c, errorCode/10000, msg)
-}
-
 func ShowParamError(c *gin.Context) {
 	ShowError(c, 4000001)
+}
+
+func ShowError(c *gin.Context, errorCode int) {
+	if errorCode == 0 {
+		ShowSuccess(c, nil)
+	} else {
+		msg := ErrorMessage{}
+		msg.Code = errorCode
+		msg.Message = dict.Get(convert.ToStr(errorCode))
+
+		ShowMsg(c, errorCode/10000, msg)
+	}
 }
 
 func ShowErrorMsg(c *gin.Context, errorCode int, errMsg interface{}) {

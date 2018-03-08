@@ -62,13 +62,13 @@ func GetBytes(name string) ([]byte, error) {
 }
 
 func Set(name string, value interface{}, args ...int32) error {
-	bytes, err := encode(value)
+	b, err := encode(value)
 	if err != nil {
 		return err
 	}
 
 	expire := getExpire(args...)
-	return client.Set(&MC.Item{Key: keyPrefix + name, Value: bytes, Expiration: expire})
+	return client.Set(&MC.Item{Key: keyPrefix + name, Value: b, Expiration: expire})
 }
 
 func Get(name string, value interface{}) error {
@@ -101,13 +101,13 @@ func decode(b []byte, v interface{}) error {
 }
 
 func SetObject(name string, value interface{}, args ...int32) error {
-	bytes, err := json.Marshal(value)
+	b, err := json.Marshal(value)
 	if err != nil {
 		return err
 	}
 
 	expire := getExpire(args...)
-	return client.Set(&MC.Item{Key: keyPrefix + name, Value: bytes, Expiration: expire})
+	return client.Set(&MC.Item{Key: keyPrefix + name, Value: b, Expiration: expire})
 }
 
 func GetObject(name string, value interface{}) error {

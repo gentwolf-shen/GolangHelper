@@ -17,6 +17,10 @@ func Load(filename string) error {
 	return err
 }
 
+func LoadFromStr(str string) error {
+	return json.Unmarshal([]byte(str), &items)
+}
+
 func Get(key string) string {
 	return items[key]
 }

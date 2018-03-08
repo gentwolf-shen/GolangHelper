@@ -73,7 +73,7 @@ func (this *Base) TableItemExists(table, key string, value interface{}, keyId in
 func (this *Base) TableItemUpdate(table, key, value string, keyId int64) bool {
 	name := table + "TableItemUpdate" + key
 
-	sql := "UPDATE " + table + " SET " + key + "=? WHERE user_id=? AND id=?"
+	sql := "UPDATE " + table + " SET " + key + "=? WHERE id=?"
 	_, err := this.PrepareExec(name, sql, value, keyId)
 	if err != nil {
 		logger.Out.Error.Println(sql)

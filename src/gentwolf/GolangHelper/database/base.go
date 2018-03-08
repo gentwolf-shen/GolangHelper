@@ -16,6 +16,10 @@ func (this *Base) Version() string {
 	return "1.0"
 }
 
+func (this *Base) DbType() string {
+	return this.dbType
+}
+
 func (this *Base) OpenDb(dbType string, dsn string, maxOpenConnections int, maxIdleConnections int) error {
 	this.dbType = dbType
 

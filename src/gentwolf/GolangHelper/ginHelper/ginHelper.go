@@ -1,6 +1,8 @@
 package ginHelper
 
 import (
+	"net/url"
+
 	"gentwolf/GolangHelper/convert"
 	"gentwolf/GolangHelper/dict"
 	"gentwolf/GolangHelper/grace"
@@ -60,6 +62,10 @@ func ShowParamError(c *gin.Context) {
 	ShowError(c, 4000001)
 }
 
+func ShowNotFound(c *gin.Context) {
+	ShowError(c, 4040000)
+}
+
 func ShowError(c *gin.Context, errorCode int) {
 	if errorCode == 0 {
 		ShowSuccess(c, nil)
@@ -103,6 +109,20 @@ func RestartGin(c *gin.Context) {
 			c.String(200, "restart succeed")
 		}
 	}
+}
+
+func GetReferer(c *gin.Context) string {
+	referer := c.Request.Header.Get("Referer")
+	r, _ := url.Parse(referer)
+	return r.Scheme + "://" + r.Host
+}
+
+func GetHost(c *gin.Context, isAddHttp bool) string {
+	host := c.Request.Host
+	if isAddHttp {
+		host = "https://" + host
+	}
+	return host
 }
 
 type ErrorMessage struct {

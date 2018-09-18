@@ -61,3 +61,14 @@ func GB2312ToUTF8(in []byte) ([]byte, error) {
 
 	return output[0:outputLen], nil
 }
+
+func GBKToUTF8(in []byte) ([]byte, error) {
+	output := make([]byte, len(in)*2)
+	_, outputLen, err := Convert(in, output, "GBK", "UTF-8")
+
+	if err != nil {
+		return nil, err
+	}
+
+	return output[0:outputLen], nil
+}

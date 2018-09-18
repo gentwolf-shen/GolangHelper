@@ -55,6 +55,10 @@ func PostToBody(hostUrl string, body []byte, headers map[string]string) ([]byte,
 	return httpRequest("POST", hostUrl, nil, headers, true, body)
 }
 
+func DeleteToBody(hostUrl string, body []byte, headers map[string]string) ([]byte, error) {
+	return httpRequest("DELETEBODY", hostUrl, nil, headers, true, body)
+}
+
 func httpRequest(method string, hostUrl string, params url.Values, headers map[string]string, isPostToBody bool, body []byte) ([]byte, error) {
 	var request *http.Request
 	var err error
@@ -67,6 +71,10 @@ func httpRequest(method string, hostUrl string, params url.Values, headers map[s
 		request, err = http.NewRequest(method, hostUrl, nil)
 	} else {
 		if isPostToBody {
+			if method == "DELETEBODY" {
+				method = "DELETE"
+			}
+
 			request, err = http.NewRequest(method, hostUrl, bytes.NewReader(body))
 			if headers == nil || len(headers) == 0 {
 				request.Header.Add("Content-Type", "application/json;charset=utf-8")
